@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- A sheet of paper with a folded corner and a scan line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,26h34l10,10v46H32z" />
+    <path
+        android:fillColor="#C8DED7"
+        android:pathData="M66,26v10h10z" />
+    <path
+        android:fillColor="#2E6B5E"
+        android:pathData="M39,45h30v4H39zM39,53h30v4H39zM39,61h22v4H39z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.9"
+        android:pathData="M30,70h48v3H30z" />
+</vector>
