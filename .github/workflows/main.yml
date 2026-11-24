@@ -33,7 +33,8 @@ jobs:
           if [ -n "$SDKMANAGER" ]; then
             echo "Using sdkmanager: $SDKMANAGER"
             yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
-            "$SDKMANAGER" "platforms;android-34" "build-tools;34.0.0" "platform-tools" || true
+            "$SDKMANAGER" "platforms;android-34" "platforms;android-35" "build-tools;34.0.0" "build-tools;35.0.0" "platform-tools" || true
+
           else
             echo "sdkmanager missing; using preinstalled SDK"
           fi
