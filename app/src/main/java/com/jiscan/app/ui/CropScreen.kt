@@ -34,6 +34,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -121,7 +122,7 @@ fun CropScreen(
                 // Draw the image fitted with letterboxing.
                 val (left, top, dispW, dispH) = fitRect(bitmap.width, bitmap.height, size.width, size.height)
                 drawImage(
-                    image = androidx.compose.ui.graphics.asImageBitmap(bitmap),
+                    image = bitmap.asImageBitmap(),
                     dstOffset = androidx.compose.ui.unit.IntOffset(left.toInt(), top.toInt()),
                     dstSize = androidx.compose.ui.unit.IntSize(dispW.toInt(), dispH.toInt())
                 )
