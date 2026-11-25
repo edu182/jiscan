@@ -3,7 +3,7 @@ package com.jiscan.app.ui
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Image as ComposeImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -274,7 +274,7 @@ private fun DocumentCard(
         Column(Modifier.padding(10.dp)) {
             Box(Modifier.fillMaxWidth().height(120.dp).background(Color(0xFFEDEAE0)),
                 contentAlignment = Alignment.Center) {
-                if (thumb != null) Image(thumb.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                if (thumb != null) ComposeImage(thumb.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                 else Icon(Icons.Filled.Description, null, Modifier.size(40.dp), tint = InkGreen)
                 if (organizeMode && selectedForMerge) {
                     Text("已选", color = Color.White, fontWeight = FontWeight.Bold,
@@ -378,7 +378,7 @@ private fun DocumentDetail(
                 Card(Modifier.fillMaxWidth().padding(vertical = 3.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Row(Modifier.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (bmp != null) Image(bmp.asImageBitmap(), null, Modifier.size(56.dp, 74.dp), contentScale = ContentScale.Crop)
+                        if (bmp != null) ComposeImage(bmp.asImageBitmap(), null, Modifier.size(56.dp, 74.dp), contentScale = ContentScale.Crop)
                         Spacer(Modifier.width(8.dp))
                         Text(name.replace(current.id + "_", ""), fontSize = 12.sp, modifier = Modifier.weight(1f))
                         IconButton(onClick = {
