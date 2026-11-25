@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.TorchState
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
@@ -32,7 +33,7 @@ class CameraController(context: Context) {
         } catch (_: Exception) {}
     }
 
-    fun isTorchOn(): Boolean = try { controller.isTorchOn } catch (_: Exception) { false }
+    fun isTorchOn(): Boolean = try { controller.torchState.value == TorchState.ON } catch (_: Exception) { false }
 
     fun hasFlash(): Boolean = try { controller.cameraInfo?.hasFlashUnit() ?: false } catch (_: Exception) { false }
 
