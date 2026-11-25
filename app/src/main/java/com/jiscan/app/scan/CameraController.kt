@@ -37,7 +37,8 @@ class CameraController(context: Context) {
     fun hasFlash(): Boolean = try { controller.cameraInfo?.hasFlashUnit() ?: false } catch (_: Exception) { false }
 
     fun capture(file: File, onResult: (Boolean, Exception?) -> Unit) {
-        controller.takePicture(file, executor, object : ImageCapture.OnImageSavedCallback {
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+        controller.takePicture(outputOptions, executor, object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                 onResult(true, null)
             }
