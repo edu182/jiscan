@@ -36,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -82,13 +83,15 @@ fun ScanScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    val prefs = remember { context.getSharedPreferences("jiscan_ui", android.content.Context.MODE_PRIVATE) }
     var scanMode by remember { mutableStateOf(ScanMode.DOCUMENT) }
     var rectifyMode by remember { mutableStateOf(RectifyMode.AUTO) }
     var colorFilter by remember { mutableStateOf(ColorFilterMode.COLOR) }
     var torchMode by remember { mutableStateOf(TorchMode.AUTO) }
     var guideLine by remember { mutableStateOf(GuideLine.GRID) }
     var normalize by remember { mutableStateOf(true) }
-    var showGuide by remember { mutableStateOf(true) }
+    var showGuide by remember { mutableStateOf(prefs.getBoolean("show_guide", true)) }
+    var showOptions by remember { mutableStateOf(prefs.getBoolean("show_options", true)) }
 
     val cameraController = remember { CameraController(context) }
     val previewView = remember {
@@ -124,7 +127,13 @@ fun ScanScreen(
         }
 
         if (showGuide && hasCameraPermission && pendingCount == 0) {
-            GuideOverlay(onDismiss = { showGuide = false })
+            GuideOverlay(
+                onDismiss = { showGuide = false },
+                onNeverShow = {
+                    showGuide = false
+                    prefs.edit().putBoolean("show_guide", false).apply()
+                }
+            )
         }
 
         // Top bar: retake / import / save N pages.
@@ -172,28 +181,47 @@ fun ScanScreen(
                 Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                MatrixRow("模式", listOf("文档", "书本", "证件"),
-                    listOf(ScanMode.DOCUMENT, ScanMode.BOOK, ScanMode.CARD), scanMode) { scanMode = it }
-                MatrixRow("矫正", listOf("自动", "手动", "曲线"),
-                    listOf(RectifyMode.AUTO, RectifyMode.MANUAL, RectifyMode.CURVE), rectifyMode) { rectifyMode = it }
-                MatrixRow("滤镜", listOf("彩色", "黑白"),
-                    listOf(ColorFilterMode.COLOR, ColorFilterMode.BLACK_WHITE), colorFilter) { colorFilter = it }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    MatrixLabel("灯光")
-                    val torchLabels = listOf("自动", "长开", "长闭")
-                    val torchValues = listOf(TorchMode.AUTO, TorchMode.ON, TorchMode.OFF)
-                    OptionGroup(torchLabels, torchValues.indexOf(torchMode)) { idx ->
-                        torchMode = torchValues[idx]
-                        cameraController.setTorch(torchMode)
-                    }
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("选项", color = Color(0xFFB8CFC7), fontSize = 12.sp)
+                    Text(
+                        if (showOptions) "收起" else "展开",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        modifier = Modifier.clickable {
+                            showOptions = !showOptions
+                            prefs.edit().putBoolean("show_options", showOptions).apply()
+                        }.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    MatrixLabel("参考线")
-                    val gLabels = listOf("九宫格", "十字线", "无")
-                    val gValues = listOf(GuideLine.GRID, GuideLine.CROSS, GuideLine.NONE)
-                    OptionGroup(gLabels, gValues.indexOf(guideLine)) { guideLine = gValues[it] }
+                if (showOptions) {
+                    MatrixRow("模式", listOf("文档", "书本", "证件"),
+                        listOf(ScanMode.DOCUMENT, ScanMode.BOOK, ScanMode.CARD), scanMode) { scanMode = it }
+                    MatrixRow("矫正", listOf("自动", "手动", "曲线"),
+                        listOf(RectifyMode.AUTO, RectifyMode.MANUAL, RectifyMode.CURVE), rectifyMode) { rectifyMode = it }
+                    MatrixRow("滤镜", listOf("彩色", "黑白"),
+                        listOf(ColorFilterMode.COLOR, ColorFilterMode.BLACK_WHITE), colorFilter) { colorFilter = it }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MatrixLabel("灯光")
+                        val torchLabels = listOf("自动", "长开", "长闭")
+                        val torchValues = listOf(TorchMode.AUTO, TorchMode.ON, TorchMode.OFF)
+                        OptionGroup(torchLabels, torchValues.indexOf(torchMode)) { idx ->
+                            torchMode = torchValues[idx]
+                            cameraController.setTorch(torchMode)
+                        }
+                    }
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MatrixLabel("参考线")
+                        val gLabels = listOf("九宫格", "十字线", "无")
+                        val gValues = listOf(GuideLine.GRID, GuideLine.CROSS, GuideLine.NONE)
+                        OptionGroup(gLabels, gValues.indexOf(guideLine)) { guideLine = gValues[it] }
+                    }
                 }
 
                 // Shutter + normalize toggle + doc info.
@@ -318,7 +346,7 @@ private fun GuideLines(mode: GuideLine) {
 }
 
 @Composable
-private fun GuideOverlay(onDismiss: () -> Unit) {
+private fun GuideOverlay(onDismiss: () -> Unit, onNeverShow: () -> Unit) {
     Box(Modifier.fillMaxSize().clickable(onClick = onDismiss).background(Color(0x88000000)),
         contentAlignment = Alignment.Center) {
         Surface(color = Color(0xE6222222), shape = RoundedCornerShape(16.dp)) {
@@ -328,6 +356,9 @@ private fun GuideOverlay(onDismiss: () -> Unit) {
                 Text("对准文档，自动框选并校正；可连续拍多页", color = Color(0xFFC8E0D9), fontSize = 13.sp, textAlign = TextAlign.Center)
                 Text("顶部可重拍/导入/保存，底部切换模式", color = Color(0xFF9FC4BA), fontSize = 12.sp, textAlign = TextAlign.Center)
                 Button(onClick = onDismiss) { Text("开始扫描") }
+                TextButton(onClick = onNeverShow) {
+                    Text("不再提示", color = Color(0xFF9FC4BA), fontSize = 12.sp)
+                }
             }
         }
     }
